@@ -1,0 +1,129 @@
+package com.employee.employee_management_system;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
+
+import java.util.List;
+
+public class App {
+	public static void main(String[] args) {
+		// Create Hibernate configuration
+        Configuration configuration = new Configuration();
+
+        // Read hibernate.cfg.xml
+        configuration.configure("hibernate.cfg.xml");
+
+        // Register Employee entity
+        configuration.addAnnotatedClass(Employee.class);
+
+        // Create SessionFactory
+        SessionFactory sessionFactory =
+                configuration.buildSessionFactory();
+
+
+        // ==========================================
+        // CREATE EMPLOYEE
+        // ==========================================
+
+        Session session = sessionFactory.openSession();
+
+        Transaction transaction = session.beginTransaction();
+
+        Employee employee = new Employee(1,"Khaja","skhaja7536@gmail.com",50000.0,"full stack developer","IT");
+
+        session.persist(employee);
+
+        transaction.commit();
+
+        session.close();
+
+        System.out.println("Employee saved successfully.");
+        System.out.println("Generated ID: " + employee.getId());
+
+
+        // ==========================================
+        // READ EMPLOYEE
+        // ==========================================
+
+        session = sessionFactory.openSession();
+
+        Employee foundEmployee =
+                session.get(Employee.class, employee.getId());
+
+        System.out.println("Employee found:");
+        System.out.println(foundEmployee);
+
+        session.close();
+
+
+        // ==========================================
+        // READ ALL EMPLOYEES
+        // ==========================================
+
+        session = sessionFactory.openSession();
+
+        List<Employee> employees =
+                session.createQuery("FROM Employee", Employee.class).getResultList();
+
+        System.out.println("\nAll Employees:");
+
+        for (Employee e : employees) {
+            System.out.println(e);
+        }
+
+        session.close();
+
+
+        // ==========================================
+        // UPDATE EMPLOYEE
+        // ==========================================
+
+        session = sessionFactory.openSession();
+
+        transaction = session.beginTransaction();
+
+        Employee employeeToUpdate =
+                session.get(Employee.class, employee.getId());
+
+        employeeToUpdate.setSalary(60000);
+
+        session.merge(employeeToUpdate);
+
+        transaction.commit();
+
+        session.close();
+
+        System.out.println("\nEmployee updated successfully.");
+
+
+        // ==========================================
+        // DELETE EMPLOYEE
+        // ==========================================
+
+        session = sessionFactory.openSession();
+
+        transaction = session.beginTransaction();
+
+        Employee employeeToDelete =
+                session.get(Employee.class, employee.getId());
+
+        if (employeeToDelete != null) {
+
+            session.remove(employeeToDelete);
+
+            System.out.println(
+                    "Employee deleted successfully."
+            );
+        }
+
+        transaction.commit();
+
+        session.close();
+
+
+        // Close SessionFactory
+        sessionFactory.close();
+	}
+}
